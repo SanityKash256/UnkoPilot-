@@ -1,4 +1,4 @@
-// SocialPilot: connect-social-channel
+// SocialFlight: connect-social-channel
 // Called from the frontend once a business owner finishes the WhatsApp/
 // Instagram OAuth flow (or, for WhatsApp Cloud API test mode, once they've
 // copied their phone_number_id from the Meta dashboard). Writes the

@@ -1,4 +1,4 @@
--- SocialPilot (formerly UnkoPilot) core schema
+-- SocialFlight (formerly UnkoPilot) core schema
 -- Run in the Supabase SQL editor, or via `supabase db push` with the CLI.
 -- Every tenant-owned table carries business_id; see 002_rls.sql for the
 -- Row Level Security policies that actually enforce isolation.

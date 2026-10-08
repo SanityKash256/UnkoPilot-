@@ -1,6 +1,6 @@
-# SocialPilot — Supabase backend starter
+# SocialFlight — Supabase backend starter
 
-This folder is everything needed to move SocialPilot (built from the original
+This folder is everything needed to move SocialFlight (built from the original
 UnkoPilot PRD) off browser `localStorage` and onto a real, multi-tenant
 Postgres database with working WhatsApp/Instagram message ingestion. It was
 generated and tested against a real local Postgres instance, but never
@@ -14,7 +14,7 @@ the database, longer for real channel credentials).
 | Claim | Reality |
 |---|---|
 | "Connect to your Supabase link and store data" | Can't be done directly — no outbound network from the build environment. The SQL below is the complete, ready-to-paste schema instead. |
-| "Channels with no limitations" | Doesn't exist on any platform — Meta and TikTok gate message access behind developer apps and review. WhatsApp's test mode is the fastest honest path (minutes, not days). TikTok has no public inbox API at all — it can only be a *posting* target, not an incoming-message channel. |
+| "Channels with no limitations" | Doesn't exist on any platform — Meta and TikTok gate message access behind developer apps and review. WhatsApp's test mode is the fastest honest path (minutes, not days). TikTok has no DM inbox API at all; comment replies are possible but only through the Ads Manager API, gated behind TikTok for Business approval (see §3). |
 | "Deploy the site and give a link" | Already live: **https://claude.ai/artifact/8ErjHU54DaYDb7ZypPX22c** — real and shareable now. A custom-domain production deploy needs your own Vercel/Supabase accounts. |
 
 ## 1. Create the database (5 minutes)
@@ -66,7 +66,7 @@ comments). Every other function keeps the default JWT check.
    insert into social_channels (business_id, provider, external_account_id, account_name, status)
    values ('<your business id>', 'WhatsApp', '<phone_number_id>', '+1 555 0100', 'connected');
    ```
-   (Once `connect-social-channel` is wired into the SocialPilot UI, this
+   (Once `connect-social-channel` is wired into the SocialFlight UI, this
    becomes a button instead of a manual insert.)
 5. Under **API Setup**, add your own phone as a test recipient, then message
    that test number from your phone. It should land in the `messages` table
@@ -80,13 +80,24 @@ Instagram/Messenger follow the same App, adding the **Messenger** product
 and an Instagram-linked Page — same webhook endpoint, same function handles
 both (see the `entry.messaging` branch in `social-webhook/index.ts`).
 
-TikTok: no public inbox API exists to receive customer DMs. Keep it as a
-*posting* destination in Marketing Studio and don't promise it as an inbox
-channel.
+TikTok: there's no public DM inbox API at all on any TikTok surface, so DMs
+were never realistic. Comment replies are different — TikTok's Ads Manager
+"Comments Manager" (under the Marketing/Business API, tied to an ads
+account and requiring TikTok for Business approval) does support reading
+and replying to comments on your videos. There's no public webhook for
+organic comment events, so this has to be a **polling** integration, not a
+push one like Meta's: a scheduled function calls TikTok's comment-list
+endpoint on an interval, diffs against what's already stored, inserts new
+comments as messages on a `channel = 'TikTok'` conversation, and posts
+replies back through the same API when an agent or the AI responds. That
+function isn't included in this folder yet (it needs your TikTok for
+Business approval and app credentials first) — treat TikTok today as a
+*posting* destination in Marketing Studio, and add comment polling once
+you have Ads Manager access.
 
 ## 4. Wire the frontend
 
-Replace the `localStorage`-backed `DB` object in the SocialPilot frontend
+Replace the `localStorage`-backed `DB` object in the SocialFlight frontend
 with Supabase client calls. The shapes match closely by design —
 `DB.businesses` → `businesses` table, `DB.data[bizId].customers` →
 `customers` filtered by `business_id`, etc. The biggest behavior change: the

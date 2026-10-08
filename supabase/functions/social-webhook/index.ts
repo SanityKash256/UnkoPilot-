@@ -1,7 +1,9 @@
-// SocialPilot: social-webhook
+// SocialFlight: social-webhook
 // One Edge Function endpoint handles both WhatsApp Cloud API and
 // Instagram/Facebook Messenger webhooks (Meta uses the same envelope
-// shape for both). Deploy with:
+// shape for both). TikTok is NOT handled here -- TikTok has no push
+// webhook for organic comments, so a comment-reply integration needs a
+// separate polling function (see supabase/README.md). Deploy with:
 //
 //   supabase functions deploy social-webhook --no-verify-jwt
 //
@@ -132,7 +134,7 @@ Deno.serve(async (req) => {
           // This is the hand-off point: call your ai-auto-reply function
           // here (or let a database webhook / cron trigger it) to decide
           // whether this message is answerable automatically -- mirroring
-          // the route() logic in the SocialPilot prototype -- or whether
+          // the route() logic in the SocialFlight prototype -- or whether
           // it should stay in the human queue.
           //
           // await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/ai-auto-reply`, {
